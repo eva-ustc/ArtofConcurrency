@@ -20,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class LockProducerConsumerPattern {
 
-    static Lock lock = new ReentrantLock();
+    static Lock lock = new ReentrantLock(true);
     static Condition producer = lock.newCondition();
     static Condition consumer = lock.newCondition();
     static CountDownLatch count = new CountDownLatch(1);
@@ -30,10 +30,10 @@ public class LockProducerConsumerPattern {
 
     public static void main(String[] args) throws InterruptedException {
         for (int i = 0; i < 10; i++) {
-            new Thread(new Producer()).start();
+            new Thread(new Producer(),"Producer"+i).start();
         }
         for (int i = 0; i < 10; i++) {
-            new Thread(new Consumer()).start();
+            new Thread(new Consumer(),"Consumer"+i).start();
         }
         count.await();
     }
@@ -50,7 +50,7 @@ public class LockProducerConsumerPattern {
                         producer.await();
                     }
                     queue.offer(goods);
-                    System.out.println("【生产者】生产一个产品" + (goods++) + "，当前队列中产品数量：" + queue.size());
+                    System.out.println("【生产者"+Thread.currentThread().getName()+"】生产了1个产品" + (goods++) + "，当前队列中产品数量：" + queue.size());
                     SleepUtils.second(1);
                     consumer.signal();
                 } catch (InterruptedException e) {
@@ -74,7 +74,7 @@ public class LockProducerConsumerPattern {
                         consumer.await();
                     }
                     Integer poll = queue.poll();
-                    System.out.println("【消费者】消费了1个产品" + poll + "，当前队列中产品数量：" + queue.size());
+                    System.out.println("【消费者"+Thread.currentThread().getName()+"】消费了1个产品" + poll + "，当前队列中产品数量：" + queue.size());
                     SleepUtils.second(1);
                     producer.signal();
                 } catch (InterruptedException e) {

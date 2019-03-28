@@ -63,8 +63,7 @@ public class Sub6_4ForkJoinCountTask extends RecursiveTask<Integer> {
         Future<Integer> result = forkJoinPool.submit(task);
         try {
             System.out.println(result.get());
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
-        Unsafe unsafe;
     }
 }

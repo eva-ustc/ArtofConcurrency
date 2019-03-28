@@ -14,12 +14,7 @@ public class ExecutorTest {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        Future<?> result = executor.submit(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return 1+2;
-            }
-        });
+        Future<?> result = executor.submit(() -> 1+2);
         System.out.println(result.get());
         executor.shutdown();
     }

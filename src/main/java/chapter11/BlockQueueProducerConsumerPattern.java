@@ -20,16 +20,16 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class BlockQueueProducerConsumerPattern {
     static CountDownLatch count = new CountDownLatch(1);
-    static BlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
+    static BlockingQueue<Integer> queue = new LinkedBlockingQueue<>(5);
     static final int MAX_SIZE = 10;
     static volatile int goods = 0;
 
     public static void main(String[] args) throws InterruptedException {
         for (int i = 0; i < 5; i++) {
-            new Thread(new Producer()).start();
+            new Thread(new Producer(),"Producer"+i).start();
         }
         for (int i = 0; i < 5; i++) {
-            new Thread(new Consumer()).start();
+            new Thread(new Consumer(),"Consumer"+i).start();
         }
         count.await();
     }
@@ -39,12 +39,16 @@ public class BlockQueueProducerConsumerPattern {
         public void run() {
             while (true) {
 
-                while (queue.size() == MAX_SIZE) {
+                /*while (queue.size() == MAX_SIZE) {
                     System.out.println("【生产者】队列满了，等待消费...");
-                }
+                }*/
                 SleepUtils.second(1);
-                queue.offer(goods);
-                System.out.println("【生产者】生产一个产品" + (goods++) + "，当前队列中产品数量：" + queue.size());
+                try {
+                    queue.put(goods);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("【生产者"+Thread.currentThread().getName()+"】生产了1个产品" + (goods++) + "，当前队列中产品数量：" + queue.size());
             }
         }
     }
@@ -54,12 +58,17 @@ public class BlockQueueProducerConsumerPattern {
         public void run() {
             while (true){
 
-                while (queue.size()==0){
+                /*while (queue.size()==0){
                     System.out.println("【消费者】队列为空，等待生产...");
-                }
+                }*/
                 SleepUtils.second(1);
-                Integer poll = queue.poll();
-                System.out.println("【消费者】消费了1个产品" + poll + "，当前队列中产品数量：" + queue.size());
+                Integer poll = null;
+                try {
+                    poll = queue.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("【消费者"+Thread.currentThread().getName()+"】消费了1个产品" + poll + "，当前队列中产品数量：" + queue.size());
             }
         }
     }
